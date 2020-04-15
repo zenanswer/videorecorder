@@ -1,4 +1,4 @@
-from recorder.recorder import Recorder, ActState, FrameRecMsg
+from recorder.recorder import Recorder, ActState
 import logging
 from datetime import datetime
 import cv2
@@ -54,11 +54,12 @@ class OpenCVRecorder(Recorder):
         super().__init__()
         self._thread = None
 
-    def on_start_rec(self, file_name):
+    def on_start_rec(self, message):
         logging.info("OpenCVRecorder on_start_rec")
         if self._thread is not None:
             return ActState.Fail
 
+        file_name = message.file_name
         time_string = datetime.now().strftime("%Y%m%d-%H%M%S_")
         self._file_name = time_string+file_name+'.mp4'
 
@@ -66,7 +67,7 @@ class OpenCVRecorder(Recorder):
         self._thread.start()
         return (ActState.Succ, self._file_name)
 
-    def on_stop_rec(self):
+    def on_stop_rec(self, message):
         logging.info("OpenCVRecorder on_stop_rec")
         self._thread.stop()
         self._thread.join()

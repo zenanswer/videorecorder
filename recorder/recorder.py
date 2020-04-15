@@ -15,9 +15,10 @@ class ActState(Enum):
     Fail = 2
 
 class StartRecMsg(_RecMsg):
-    def __init__(self, file_name):
+    def __init__(self, file_name, rec_device=0):
         super().__init__(_RecAct.Start)
         self.file_name = file_name
+        self.rec_device = rec_device
 
 class StopRecMsg(_RecMsg):
     def __init__(self):
@@ -40,19 +41,16 @@ class Recorder(pykka.ThreadingActor):
         if (not isinstance(message, StartRecMsg)):
             return ActState.Fail
         logging.info("Recorder _start")
-        return self.on_start_rec(message.file_name)
+        return self.on_start_rec(message)
 
     def _stop(self, message):
         if (not isinstance(message, StopRecMsg)):
             return ActState.Fail
         logging.info("Recorder _stop")
-        return self.on_stop_rec()
+        return self.on_stop_rec(message)
 
-    def on_start_rec(self, file_name):
+    def on_start_rec(self, message):
         raise Exception("Recorder not Impl on_start_rec")
 
-    def on_stop_rec(self):
+    def on_stop_rec(self, message):
         raise Exception("Recorder not Impl on_stop_rec")
-
-    def on_frame_rec(self):
-        raise Exception("Recorder not Impl on_frame_rec")
