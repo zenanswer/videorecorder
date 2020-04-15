@@ -1,4 +1,4 @@
-from recorder.recorder import Recorder, ActState
+from recorder.recorder import Recorder, StartRecMsgAck
 import logging
 from datetime import datetime
 import cv2
@@ -65,11 +65,11 @@ class OpenCVRecorder(Recorder):
 
         self._thread = RecordingThread(self._file_name)
         self._thread.start()
-        return (ActState.Succ, self._file_name)
+        return (None, StartRecMsgAck(self._file_name))
 
     def on_stop_rec(self, message):
         logging.info("OpenCVRecorder on_stop_rec")
         self._thread.stop()
         self._thread.join()
         self._thread = None
-        return ActState.Succ
+        return (None, None)

@@ -47,15 +47,29 @@ def hello_world():
 
 @app.route('/start', methods=['GET'])
 def start_recording():
-    rec_type = request.args.get('rec_type')
-    file_name = request.args.get('file_name')
+
+    rec_type = request.args.get('rec_type', "FFMPEG", type=str)
+    file_name = request.args.get('file_name', "temp", type=str)
+    rec_device = request.args.get('rec_device', 0, type=int)
+    time_out = request.args.get('time_out', 600, type=int)
+
+    app.logger.info("start req %s, %s, %s, %s", rec_type, file_name, rec_device, time_out)
+
     rec = RecorderManager.getRecorder(RecType[rec_type])
-    result, file_name = rec.ask(StartRecMsg(file_name))
-    return make_response(Response(result.name+':'+file_name), 200)
+
+    exp, ack = rec.ask(StartRecMsg(file_name, rec_device, time_out))
+
+    app.logger.info("start rsp %s, %s", exp, ack)
+
+    if exp != None:
+        return make_response(Response(str(exp)), 400)
+    return make_response(Response(ack.file_name), 200)
 
 @app.route('/stop', methods=['GET'])
 def stop_recording():
-    rec_type = request.args.get('rec_type')
+    rec_type = request.args.get('rec_type', "FFMPEG", type=str)
     rec = RecorderManager.getRecorder(RecType[rec_type])
-    result = rec.ask(StopRecMsg())
-    return make_response(Response(result.name), 200)
+    exp, _ = rec.ask(StopRecMsg())
+    if exp != None:
+        return make_response(Response(str(exp)), 400)
+    return make_response(Response(""), 200)
